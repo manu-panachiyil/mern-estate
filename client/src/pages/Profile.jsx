@@ -7,7 +7,8 @@ import {
   uploadBytesResumable,
 } from "firebase/storage";
 import { app } from "../firebase";
-import { deleteUserFailure, deleteUserStart, deleteUserSuccess, updateUserFailure, updateUserStart, updateUserSuccess } from "../redux/user/userSlice";
+import { deleteUserFailure, deleteUserStart, deleteUserSuccess, signOutUserFailure, signOutUserStart, signOutUserSuccess, updateUserFailure, updateUserStart, updateUserSuccess } from "../redux/user/userSlice";
+import { Link } from 'react-router-dom' 
 
 function Profile() {
   const { currentUser, loading, error } = useSelector((state) => state.user);
@@ -111,6 +112,22 @@ function Profile() {
 
   }
 
+  const handleSignOut = async() => {
+    try {
+      dispatch(signOutUserStart());
+      const res = await fetch('/api/auth/signout');
+      const data = await res.json();
+      if (data.success === false){
+        dispatch(signOutUserFailure(data.message))
+        return;
+      }
+      dispatch(signOutUserSuccess(data))
+    } catch (error) {
+      dispatch(signOutUserFailure(data.message))
+
+    }
+  }
+
   return (
     <div className="max-w-lg p-3 mx-auto">
       <h1 className="text-3xl font-semibold text-center my-7">Profile </h1>
@@ -169,10 +186,13 @@ function Profile() {
         <button disabled={loading} className="bg-slate-700 text-white rounded-lg p-3 uppercase hover:opacity-95 disabled:opacity-80">
         {loading ? 'Loading' :  'update'}
         </button>
+
+            <Link className="bg-green-700 text-white p-3 rounded-lg uppercase text-center hover:opacity-95" to={'/create-listing'}>create listing</Link>
+
       </form>
       <div className="flex justify-between mt-5">
         <span onClick={handleDeleteUser} className="text-red-700 cursor-pointer">Delete account</span>
-        <span className="text-red-700 cursor-pointer">Sign out</span>
+        <span onClick={handleSignOut} className="text-red-700 cursor-pointer">Sign out</span>
       </div>
       
      <p className="text-red-700 mt-5"> {error ? error : ""}</p>
